@@ -8,6 +8,9 @@ const recipeContainer = document.querySelector('.recipe-container');
 const closeBtn = document.querySelector('.close-btn');
 const recipeDetailsContent = document.querySelector('.recipe-details-content');
 
+// Placeholder image URL
+const placeholderImage = 'placeholder.png';
+
 // Function to get recipes. 
 const fetchRecipes = async (query) => {
 
@@ -47,13 +50,14 @@ const displayRecipes = (recipes) => {
         recipeContainer.innerHTML = `<h2>No recipes found. Please try a different search term.</h2>`;
         return;
     }
-    
+
     recipes.forEach(results => {
         const recipeDiv = document.createElement('div');
         recipeDiv.classList.add('recipe')
         recipeDiv.innerHTML = `
-            <img src = "${results.image}">
-            <h3>${results.title}</h3>        `
+            <img src="${results.image}" onerror="this.onerror=null;this.src='${placeholderImage}';">
+            <h3>${results.title}</h3>        
+        `
 
         const button = document.createElement('button');
         button.textContent = "View Recipe";
