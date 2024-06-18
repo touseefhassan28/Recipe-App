@@ -20,8 +20,8 @@ const fetchRecipes = async (query) => {
     const currentTime = new Date().getTime();
 
     // Check if the query results are already in local storage and not older than 24 hours
-    if (cachedData && (currentTime - cachedData.timestamp < 86400000)) {
-        displayRecipes(cachedData.results);
+    if (cachedRecipes && (currentTime - cachedRecipes.timestamp < 86400000)) {
+        displayRecipes(cachedRecipes.results);
         return;
     }
 
