@@ -16,8 +16,12 @@ const fetchRecipes = async (query) => {
 
     // Check if the query results are already in local storage
     const cachedRecipes = localStorage.getItem(query);
-    if (cachedRecipes) {
-        displayRecipes(JSON.parse(cachedRecipes));
+
+    const currentTime = new Date().getTime();
+
+    // Check if the query results are already in local storage and not older than 24 hours
+    if (cachedData && (currentTime - cachedData.timestamp < 86400000)) {
+        displayRecipes(cachedData.results);
         return;
     }
 
@@ -30,7 +34,7 @@ const fetchRecipes = async (query) => {
         const response = await data.json();
 
         // Cache the response in localStorage
-        localStorage.setItem(query, JSON.stringify(response.results));
+        localStorage.setItem(query, JSON.stringify({ timestamp: currentTime, results: response.results }));
 
         // Display recipes
         displayRecipes(response.results);
