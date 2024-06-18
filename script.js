@@ -1,5 +1,5 @@
 // API Key
-const apiKey = '29ddc1895c664be4acdc4e3c61a623f1';
+const apiKey = 'b84168b562524bf8892a24e92e86eefa';
 
 // DOM elements
 const searchbox = document.querySelector('.searchbox');
@@ -19,37 +19,63 @@ const fetchRecipes = async (query) => {
     }
 
     recipeContainer.innerHTML = `<h2>Searching Some Tasty Recipes .....</h2>`;
-    const data = await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${apiKey}&query=${query}&addRecipeInstructions=true&addRecipeInformation=true&fillIngredients=true`)
-    const response = await data.json();
 
-    // Display recipes
-        recipeContainer.innerHTML = "";
-        response.results.forEach(results => {
+    const data = await fetch(`https://api.spoonacular.com/recipes/complexSearch?apiKey=${apiKey}&query=${query}&addRecipeInstructions=true&addRecipeInformation=true&fillIngredients=true`)
+
+    // Check if the fetch request was successful
+    if (data.ok) {
+        const response = await data.json();
+
+        // Cache the response in localStorage
+        localStorage.setItem(query, JSON.stringify(response.results));
+
+        // Display recipes
+        displayRecipes(response.results);
+
+    } else {
+
+        // Handle error
+        recipeContainer.innerHTML = `<h2>Oops! The server is on a coffee break. Please try again later.</h2>`;
+    }
+}
+
+// Function to display recipes
+const displayRecipes = (recipes) => {
+    recipeContainer.innerHTML = "";
+
+    if (recipes.length === 0) {
+        recipeContainer.innerHTML = `<h2>No recipes found. Please try a different search term.</h2>`;
+        return;
+    }
+    
+    recipes.forEach(results => {
         const recipeDiv = document.createElement('div');
         recipeDiv.classList.add('recipe')
         recipeDiv.innerHTML = `
             <img src = "${results.image}">
             <h3>${results.title}</h3>        `
 
-            const button = document.createElement('button');
-            button.textContent = "View Recipe";
-            recipeDiv.appendChild(button);
+        const button = document.createElement('button');
+        button.textContent = "View Recipe";
+        recipeDiv.appendChild(button);
 
 
-            //Adding event listner to View Recipe button.
-            button.addEventListener('click', () => {
-                openRecipePopup(results)
-            })
-
-
-            recipeContainer.appendChild(recipeDiv);
+        //Adding event listner to View Recipe button.
+        button.addEventListener('click', () => {
+            openRecipePopup(results)
         })
-    }
-    // Function to open Recipe Popup
-    const openRecipePopup = (results) => {
-        const instructions = results.analyzedInstructions[0].steps.map(step => `<li>${step.step}</li>`).join('');
-        const ingredients = results.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`).join('');
-        recipeDetailsContent.innerHTML = `
+
+
+        recipeContainer.appendChild(recipeDiv);
+    })
+}
+
+
+// Function to open Recipe Popup
+const openRecipePopup = (results) => {
+    const instructions = results.analyzedInstructions[0].steps.map(step => `<li>${step.step}</li>`).join('');
+    const ingredients = results.extendedIngredients.map(ingredient => `<li>${ingredient.original}</li>`).join('');
+    recipeDetailsContent.innerHTML = `
         <h2>${results.title}</h2>
         <h3>Ingredients</h3>
         <ul>${ingredients}</ul>
@@ -57,16 +83,25 @@ const fetchRecipes = async (query) => {
         <ol>${instructions}</ol>
         `
 
-        recipeDetailsContent.parentElement.style.display = "block";
-    }
+    recipeDetailsContent.parentElement.style.display = "block";
+}
 
-    // Close recipe details
-    closeBtn.addEventListener('click', () => {
-        recipeDetailsContent.parentElement.style.display = "none";
-    });
+// Close recipe details
+closeBtn.addEventListener('click', () => {
+    recipeDetailsContent.parentElement.style.display = "none";
+});
 
-    // Search button click event listener
-    searchbtn.addEventListener('click', () => {
+// Search button click event listener
+searchbtn.addEventListener('click', () => {
+    const searchInput = searchbox.value.trim();
+    fetchRecipes(searchInput);
+});
+
+// Search using Enter key
+searchbox.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
         const searchInput = searchbox.value.trim();
         fetchRecipes(searchInput);
-    });
+    }
+});
